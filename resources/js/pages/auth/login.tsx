@@ -19,6 +19,7 @@ type LoginForm = {
 interface LoginProps {
     status?: string;
     canResetPassword: boolean;
+    [key: string]: unknown;
 }
 
 export default function Login({ status, canResetPassword }: LoginProps) {
@@ -30,8 +31,18 @@ export default function Login({ status, canResetPassword }: LoginProps) {
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
+        
+        // CSRF Protection:
+        // 1. Inertia.js automatically includes CSRF token from meta tag or shared props
+        // 2. Laravel validates the token via VerifyCsrfToken middleware
+        // 3. No manual token handling needed - Inertia handles this automatically
         post(route('login'), {
+            preserveState: true,
+            preserveScroll: true,
             onFinish: () => reset('password'),
+            onError: (errors) => {
+                console.error('Login authentication failed:', errors);
+            },
         });
     };
 
